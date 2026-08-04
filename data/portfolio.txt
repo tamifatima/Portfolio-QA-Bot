@@ -1,0 +1,75 @@
+# About Me
+My name is Tahreem. I am a BS Software Engineering student at PUCIT (Punjab University College of Information Technology), University of the Punjab, Lahore, Pakistan. I am currently in my 6th semester (Batch 2023) with a CGPA of 3.74.
+
+# Skills
+- Languages: Python, JavaScript, Kotlin, Java, C++
+- Frontend: React, Tailwind CSS, Framer Motion, GSAP, Jetpack Compose
+- Backend: FastAPI, Django, Node.js, Express
+- AI/ML: LangChain, LangGraph, RAG, TensorFlow, Scikit-learn
+- Mobile: Android (Kotlin + Jetpack Compose + Firebase)
+- UI/UX: Figma, FigJam, Wireframing, Prototyping, Competitor Analysis, User Research
+- Databases: Firebase Firestore, PostgreSQL, ChromaDB, FAISS
+- Tools: Git, Vercel, VS Code, Postman
+
+# Projects
+
+## OUTS — Social Event Ticketing App
+- Platform: Android (Kotlin + Jetpack Compose + Firebase)
+- Description: A mobile app for discovering, sharing, and booking tickets to social events
+- Features: Firebase Authentication, Firestore real-time database, Firebase Storage for event images, QR code ticket generation
+- Role: Full-stack mobile developer (solo project)
+
+## ShieldHer — AI Women's Safety System (FYDP)
+- Type: Final Year Development Project (ongoing)
+- Description: An agentic AI-powered women's safety system with autonomous multi-modal threat detection
+- Key Component: Autonomous Safety Decision Engine (ASDE) — detects threats via audio, video, and sensor fusion
+- Tech: Python, TensorFlow, LangGraph, FastAPI
+- Team: 4-person group, supervised by Mr. Umair Babar at PUCIT
+- Role: System architect and ML lead
+
+## FasalDoc — AI Crop Disease Detection
+- Description: AI-powered crop health diagnosis tool for Pakistan's smallholder farming market
+- Features: Image-based disease detection, Urdu language support, offline-first design
+- Tech: Python, TensorFlow, React, FastAPI
+- Context: Nexen internship project — includes competitive analysis of Plantix, Agrio, OneSoil
+
+## CreativeCrew — SOFTEC Competition Entry
+- Description: A collaborative creative platform for designers and developers
+- Context: Built for SOFTEC competition at PUCIT
+
+## Al Hijama Medical Centre Website
+- Description: React conversion of an ASP.NET MVC web app for a medical centre
+- Features: Hijri calendar integration, appointment booking flow, admin dashboard, animations
+- Deployed on Vercel
+
+## Portfolio Website
+- Tech: React + Vite, Tailwind CSS, Framer Motion, GSAP
+- Links to Figma projects for OUTS, CreativeCrew, and Educare
+
+# Experience
+
+## UI/UX Design Intern — Nexen (Current)
+- Duration: 8-week internship
+- Work: FasalDoc product design, competitor app audits (Plantix, Agrio, OneSoil), user personas (Muhammad Ashraf, Farhan Iqbal, Nasreen Bibi), SWOT analysis, FigJam annotations
+
+## Teaching Assistant — PUCIT
+- Subject: ICT (Information and Communication Technology)
+- Helped students with coursework and lab exercises
+
+## Web Development Intern — Educare Online (Previous)
+- Built web features for an online education platform
+
+# Education
+- Degree: BS Software Engineering
+- University: PUCIT, University of the Punjab, Lahore
+- Batch: 2023 | Semester: 6th | CGPA: 3.74
+
+# Interests
+- AI/ML and LLM applications
+- Mobile app development
+- UI/UX Design
+- Building tools for underserved communities (e.g. farmers in Pakistan)
+
+# Contact
+- Based in Lahore, Pakistan
+- Open to internships and full-time roles in software engineering, AI/ML, and UI/UX design
