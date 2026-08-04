@@ -32,13 +32,24 @@ KEY CONCEPT — WHY RAG?
 """
 
 import os
-from dotenv import load_dotenv
+
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv(*args, **kwargs):
+        return False
 
 # ChatOpenAI = the LLM (gpt-4o-mini is fast and cheap, good for demos)
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+try:
+    from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+except ImportError:
+    ChatOpenAI = None
+    OpenAIEmbeddings = None
 
 # Chroma = our vector database (built by ingest.py)
 from langchain_chroma import Chroma
+
+from fallbacks import LocalEmbeddings, LocalMemory, LocalQAChain
 
 # ConversationalRetrievalChain = LangChain's built-in RAG + memory chain
 from langchain.chains import ConversationalRetrievalChain
@@ -102,10 +113,19 @@ def build_qa_chain():
     #
     print("🔍 Loading ChromaDB vector store...")
 
-    embeddings = OpenAIEmbeddings(
-        model="text-embedding-ada-002",
-        openai_api_key=os.getenv("OPENAI_API_KEY")
-    )
+    api_key = os.getenv("OPENAI_API_KEY")
+    if api_key and OpenAIEmbeddings is not None:
+        try:
+            embeddings = OpenAIEmbeddings(
+                model="text-embedding-ada-002",
+                openai_api_key=api_key
+            )
+        except Exception as exc:
+            print(f"   ⚠️ OpenAI embeddings unavailable: {exc}")
+            embeddings = LocalEmbeddings()
+    else:
+        print("   ⚠️ OPENAI_API_KEY not set; using local embeddings fallback")
+        embeddings = LocalEmbeddings()
 
     vectorstore = Chroma(
         persist_directory="./chroma_db",   # must match ingest.py
@@ -150,11 +170,20 @@ def build_qa_chain():
     # temperature=0.3: low temperature = more factual, less creative
     #                  (0 = deterministic, 1 = very creative)
     #
-    llm = ChatOpenAI(
-        model="gpt-4o-mini",
-        temperature=0.3,
-        openai_api_key=os.getenv("OPENAI_API_KEY")
-    )
+    api_key = os.getenv("OPENAI_API_KEY")
+    if api_key and ChatOpenAI is not None:
+        try:
+            llm = ChatOpenAI(
+                model="gpt-4o-mini",
+                temperature=0.3,
+                openai_api_key=api_key
+            )
+        except Exception as exc:
+            print(f"   ⚠️ OpenAI LLM unavailable: {exc}")
+            return LocalQAChain(vectorstore, LocalMemory()), LocalMemory()
+    else:
+        print("   ⚠️ OPENAI_API_KEY not set; using local QA fallback")
+        return LocalQAChain(vectorstore, LocalMemory()), LocalMemory()
 
     # ─── 5. BUILD THE CONVERSATIONAL RETRIEVAL CHAIN ─────────────────────────
     #

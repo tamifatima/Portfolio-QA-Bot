@@ -21,7 +21,12 @@ HOW TO RUN:
 """
 
 import os
-from dotenv import load_dotenv
+
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv(*args, **kwargs):
+        return False
 
 # LangChain document loaders — read files from disk
 from langchain_community.document_loaders import TextLoader, DirectoryLoader
@@ -30,10 +35,15 @@ from langchain_community.document_loaders import TextLoader, DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 # OpenAI embedding model — converts text → vectors
-from langchain_openai import OpenAIEmbeddings
+try:
+    from langchain_openai import OpenAIEmbeddings
+except ImportError:
+    OpenAIEmbeddings = None
 
 # ChromaDB vector store — stores and retrieves vectors
 from langchain_chroma import Chroma
+
+from fallbacks import LocalEmbeddings
 
 # ─── Load environment variables from .env file ───────────────────────────────
 # .env contains: OPENAI_API_KEY=sk-...
@@ -106,16 +116,35 @@ def ingest_documents():
     #
     print("\n🔢 Embedding chunks and saving to ChromaDB ...")
 
-    embeddings = OpenAIEmbeddings(
-        model="text-embedding-ada-002",
-        openai_api_key=os.getenv("OPENAI_API_KEY")
-    )
+    api_key = os.getenv("OPENAI_API_KEY")
+    if api_key and OpenAIEmbeddings is not None:
+        try:
+            embeddings = OpenAIEmbeddings(
+                model="text-embedding-ada-002",
+                openai_api_key=api_key
+            )
+        except Exception as exc:
+            print(f"   ⚠️ OpenAI embeddings unavailable: {exc}")
+            embeddings = LocalEmbeddings()
+    else:
+        print("   ⚠️ OPENAI_API_KEY not set; using local embeddings fallback")
+        embeddings = LocalEmbeddings()
 
-    vectorstore = Chroma.from_documents(
-        documents=chunks,
-        embedding=embeddings,
-        persist_directory="./chroma_db"   # saves DB to disk in this folder
-    )
+    try:
+        vectorstore = Chroma.from_documents(
+            documents=chunks,
+            embedding=embeddings,
+            persist_directory="./chroma_db"   # saves DB to disk in this folder
+        )
+    except Exception as exc:
+        print(f"   ⚠️ Chroma embedding failed: {exc}")
+        print("   🔁 Falling back to local embeddings and local Chroma storage")
+        embeddings = LocalEmbeddings()
+        vectorstore = Chroma.from_documents(
+            documents=chunks,
+            embedding=embeddings,
+            persist_directory="./chroma_db"
+        )
 
     print(f"   ✅ Saved {vectorstore._collection.count()} vectors to ./chroma_db")
     print("\n🎉 Ingestion complete! You can now run app.py")
