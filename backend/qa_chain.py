@@ -46,6 +46,11 @@ except ImportError:
     ChatOpenAI = None
     OpenAIEmbeddings = None
 
+try:
+    from langchain_groq import ChatGroq
+except ImportError:
+    ChatGroq = None
+
 # Chroma = our vector database (built by ingest.py)
 from langchain_chroma import Chroma
 
@@ -95,6 +100,52 @@ QA_PROMPT = PromptTemplate(
 )
 
 
+def load_chat_model():
+    provider = os.getenv("AI_PROVIDER", "openai").strip().lower()
+    temperature = float(os.getenv("AI_TEMPERATURE", "0.3"))
+
+    if provider == "groq":
+        if ChatGroq is None:
+            print("   ⚠️ langchain-groq is not installed; cannot use Groq provider")
+            return None
+        groq_api_key = os.getenv("GROQ_API_KEY")
+        if not groq_api_key:
+            print("   ⚠️ GROQ_API_KEY is not set; cannot use Groq provider")
+            return None
+        model_name = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
+        print(f"   ℹ️ Using Groq provider with model={model_name}")
+        return ChatGroq(
+            model=model_name,
+            temperature=temperature,
+            api_key=groq_api_key,
+        )
+
+    if provider != "openai":
+        print(f"   ⚠️ Unsupported AI_PROVIDER='{provider}'; falling back to local QA")
+        return None
+
+    if ChatOpenAI is None:
+        print("   ⚠️ langchain-openai is not installed; cannot use OpenAI provider")
+        return None
+
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    if not openai_api_key:
+        print("   ⚠️ OPENAI_API_KEY is not set; cannot use OpenAI provider")
+        return None
+
+    model_name = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    print(f"   ℹ️ Using OpenAI provider with model={model_name}")
+    try:
+        return ChatOpenAI(
+            model=model_name,
+            temperature=temperature,
+            openai_api_key=openai_api_key,
+        )
+    except Exception as exc:
+        print(f"   ⚠️ OpenAI chat model unavailable: {exc}")
+        return None
+
+
 def build_qa_chain():
     """
     Builds and returns the full RAG chain.
@@ -117,7 +168,7 @@ def build_qa_chain():
     if api_key and OpenAIEmbeddings is not None:
         try:
             embeddings = OpenAIEmbeddings(
-                model="text-embedding-ada-002",
+                model=os.getenv("EMBEDDING_MODEL", "text-embedding-ada-002"),
                 openai_api_key=api_key
             )
         except Exception as exc:
@@ -170,19 +221,9 @@ def build_qa_chain():
     # temperature=0.3: low temperature = more factual, less creative
     #                  (0 = deterministic, 1 = very creative)
     #
-    api_key = os.getenv("OPENAI_API_KEY")
-    if api_key and ChatOpenAI is not None:
-        try:
-            llm = ChatOpenAI(
-                model="gpt-4o-mini",
-                temperature=0.3,
-                openai_api_key=api_key
-            )
-        except Exception as exc:
-            print(f"   ⚠️ OpenAI LLM unavailable: {exc}")
-            return LocalQAChain(vectorstore, LocalMemory()), LocalMemory()
-    else:
-        print("   ⚠️ OPENAI_API_KEY not set; using local QA fallback")
+    llm = load_chat_model()
+    if llm is None:
+        print("   ⚠️ Using local QA fallback instead of an external LLM")
         return LocalQAChain(vectorstore, LocalMemory()), LocalMemory()
 
     # ─── 5. BUILD THE CONVERSATIONAL RETRIEVAL CHAIN ─────────────────────────

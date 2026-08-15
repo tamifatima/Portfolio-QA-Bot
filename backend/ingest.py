@@ -120,7 +120,7 @@ def ingest_documents():
     if api_key and OpenAIEmbeddings is not None:
         try:
             embeddings = OpenAIEmbeddings(
-                model="text-embedding-ada-002",
+                model=os.getenv("EMBEDDING_MODEL", "text-embedding-ada-002"),
                 openai_api_key=api_key
             )
         except Exception as exc:

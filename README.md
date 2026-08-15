@@ -82,8 +82,20 @@ portfolio-qa-bot/
 # Copy the example env file
 cp .env.example .env
 
-# Edit .env and add your actual OpenAI key
+# Edit .env and add your actual keys
+# AI_PROVIDER=openai
 # OPENAI_API_KEY=sk-...
+# OPENAI_MODEL=gpt-4o-mini
+
+# Optional: use Groq for generation instead of OpenAI
+# AI_PROVIDER=groq
+# GROQ_API_KEY=...
+# GROQ_MODEL=llama-3.1-8b-instant
+# Install the optional Groq provider in backend/.venv:
+# pip install langchain-groq
+#
+# Gemini is not supported by the current project setup without a compatible
+# Gemini LangChain provider package.
 ```
 
 ---
